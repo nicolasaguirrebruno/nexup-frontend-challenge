@@ -51,13 +51,33 @@
   transform: scale(0.95);
 }
 
+.refreshButton {
+  color: var(--primary-nexup-color);
+  background-color: white;
+  border: 1px solid var(--primary-nexup-color);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.5s;
+}
+
+.refreshButton:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+.refreshButton:active {
+  transform: scale(0.95);
+}
+
 .filterContainer {
   width: 90%;
   margin: 2.5% auto;
   display: flex;
   gap: 5%;
 }
-
 
 .searchInput {
   width: 30%;
