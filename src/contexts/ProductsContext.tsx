@@ -5,9 +5,9 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { ProductCategory } from '../models/ProductCategory';
-import { Product } from '../models/Product';
+
 import { getProductList } from '../api/products';
+import { Product, ProductCategory } from '../models';
 
 interface ProductsContextType {
   products: Product[];
