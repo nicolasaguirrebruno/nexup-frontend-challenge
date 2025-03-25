@@ -1,17 +1,17 @@
 import { products } from '../mocks/productsMocks';
-import { Stock } from '../models';
-import { Product } from '../models/Product';
-import { ProductCategory } from '../models/ProductCategory';
+import { Stock, PaginateInformation, ProductCategory } from '../models';
+import { PaginatedProductResult } from './types/Products';
 
 export const getProductList = (
+  paginateInformation: PaginateInformation,
   category?: ProductCategory,
   stockOption?: Stock,
   search?: string,
-): Product[] => {
+): PaginatedProductResult => {
   const isAllCategory = category === ProductCategory.All || !category;
   const isAllStock = stockOption === Stock.All || !stockOption;
   const hasSearch = !!search?.trim();
-
+  const { currentPage, itemsPerPage } = paginateInformation;
   let filtered = [...products];
 
   if (!isAllCategory) {
@@ -32,5 +32,11 @@ export const getProductList = (
     });
   }
 
-  return filtered;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  return {
+    products: filtered.slice(startIndex, endIndex),
+    totalPages: Math.ceil(filtered.length / itemsPerPage),
+  };
 };

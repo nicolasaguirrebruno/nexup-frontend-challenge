@@ -37,7 +37,11 @@ export const CategoryFilter = () => {
   };
 
   useEffect(() => {
-    handleProductSearch(productSearch);
+    const timeout = setTimeout(() => {
+      handleProductSearch(productSearch);
+    }, 300);
+
+    return () => clearTimeout(timeout);
   }, [productSearch, handleProductSearch]);
 
   return (

@@ -4,13 +4,15 @@ import styles from './styles/productManager.module.css';
 import { CategoryFilter } from './CategoryFilter';
 import { ProductList } from './ProductList';
 import { useProducts } from '../hooks/useProducts';
+import { PAGE_INFORMATION_INITIAL_STATE } from '../constants';
 
 export const ProductManager: React.FC = () => {
-  const { getProducts, products } = useProducts();
+  const { getProducts } = useProducts();
 
   useEffect(() => {
-    getProducts();
-  }, [getProducts]);
+    getProducts(PAGE_INFORMATION_INITIAL_STATE);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <section className={styles.productManagerContainer}>
@@ -28,7 +30,7 @@ export const ProductManager: React.FC = () => {
         </div>
       </header>
       <CategoryFilter />
-      <ProductList productList={products} />
+      <ProductList />
     </section>
   );
 };

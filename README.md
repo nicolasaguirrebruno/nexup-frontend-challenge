@@ -51,39 +51,22 @@ Along with the previous point, inside the context I split the logic into atomic 
 
 ```typescript
 const changeProductCategoryFilter = useCallback(
-  async (category: ProductCategory | '') => {
-    if (category === '') {
-      setSelectedCategory(undefined);
-      await getProducts(undefined, selectedStock);
-      return;
-    }
+    async (category: ProductCategory | '') => {
+      setSelectedCategory(category || undefined);
+    },
+    [],
+  );
 
-    setSelectedCategory(category);
-    await getProducts(category, selectedStock);
-  },
-  [getProducts, selectedStock],
-);
+  const changeStockOptionFilter = useCallback(
+    async (stockOption: Stock | '') => {
+      setSelectedStock(stockOption || undefined);
+    },
+    [],
+  );
 
-const changeStockOptionFilter = useCallback(
-  async (stockOption: Stock | '') => {
-    if (stockOption === '') {
-      setSelectedStock(undefined);
-      await getProducts(selectedCategory, undefined);
-      return;
-    }
-
-    setSelectedStock(stockOption);
-    await getProducts(selectedCategory, stockOption);
-  },
-  [getProducts, selectedCategory],
-);
-
-const handleProductSearch = useCallback(
-  (search: string) => {
-    getProducts(selectedCategory, selectedStock, search);
-  },
-  [getProducts, selectedCategory, selectedStock],
-);
+  const handleProductSearch = useCallback((productSearch: string) => {
+    setSearch(productSearch);
+  }, []);
 ```
 
 Instead of having one big function to manage all filters, I created a separate function for each one.  
@@ -109,19 +92,38 @@ This is important for two main reasons:
 Example:
 
 ```tsx
-const changeStockOptionFilter = useCallback(
-  async (stockOption: Stock | '') => {
-    if (stockOption === '') {
-      setSelectedStock(undefined);
-      await getProducts(selectedCategory, undefined);
-      return;
-    }
+const getProducts = useCallback(
+    async (page: PaginateInformation) => {
+      try {
+        setIsProductsLoading(true);
+        const finalPageInformation = page || PAGE_INFORMATION_INITIAL_STATE;
 
-    setSelectedStock(stockOption);
-    await getProducts(selectedCategory, stockOption);
-  },
-  [getProducts, selectedCategory],
-);
+        const { products: fetchedProducts, totalPages } =
+          await new Promise<PaginatedProductResult>((resolve) => {
+            setTimeout(async () => {
+              const data = await getProductList(
+                finalPageInformation,
+                selectedCategory,
+                selectedStock,
+                search,
+              );
+              resolve(data);
+            }, 500);
+          });
+
+        setProducts(fetchedProducts);
+        setPaginateInformation({
+          ...page,
+          maxPage: totalPages,
+        });
+      } catch (error) {
+        setProductsFetchError(true);
+      } finally {
+        setIsProductsLoading(false);
+      }
+    },
+    [search, selectedCategory, selectedStock],
+  );
 ```
 
 #### `useMemo`
