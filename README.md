@@ -33,11 +33,11 @@ This is a challenge for the recruitment process at the **Nexup** team.
 - Instalation
 - Key Principles Used During Development
 
-# Instalation
+## Instalation
 
 First clone the repository and then hit the command `$ npm install` to get the necessary to build components.
 
-# Key Principles Used During Development
+## Key Principles Used During Development
 
 The main goal was to create a piece of functionality that feels as realistic as possible.  
 To achieve this, I implemented several architectural decisions.
