@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ProductCategory, Stock } from '../models';
-import styles from './styles/products.module.css';
+import styles from './styles/categoryFilter.module.css';
 import { useProducts } from '../hooks/useProducts';
 
 export const CategoryFilter = () => {

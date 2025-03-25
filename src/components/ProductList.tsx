@@ -1,7 +1,8 @@
 import React from 'react';
 import { Product } from '../models/Product';
-import styles from './styles/products.module.css';
-import { Chip } from './Chip';
+import styles from './styles/productList.module.css';
+import { Chip, LoadingSpinner } from '../shared';
+import { useProducts } from '../hooks/useProducts';
 
 interface ProductListProps {
   productList: Product[];
@@ -15,6 +16,7 @@ export const ProductList: React.FC<ProductListProps> = ({
     return `$${moneyValue.toFixed(2)}`;
   };
 
+  const { isProductsLoading } = useProducts();
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -27,21 +29,36 @@ export const ProductList: React.FC<ProductListProps> = ({
             <th>Stock</th>
           </tr>
         </thead>
-        <tbody className={styles.tableBody}>
-          {productList.map((product) => (
-            <tr key={product.id}>
-              <td>
-                <Chip status={product.status} />
-              </td>
 
-              <td>{product.name}</td>
-              <td>{product.category}</td>
-              <td>{formatMoney(product.price)}</td>
-              <td>{product.stock}</td>
-            </tr>
+        {!isProductsLoading &&
+          productList.length > 0 &&
+          productList.map((product) => (
+            <tbody className={styles.tableBody}>
+              <tr key={product.id}>
+                <td>
+                  <Chip status={product.status} />
+                </td>
+
+                <td>{product.name}</td>
+                <td>{product.category}</td>
+                <td>{formatMoney(product.price)}</td>
+                <td>{product.stock}</td>
+              </tr>
+            </tbody>
           ))}
-        </tbody>
       </table>
+
+      {!isProductsLoading && !productList.length && (
+        <div className={styles.spinnerContainer}>
+          <p>There are not products with the filters you introduced.</p>
+        </div>
+      )}
+
+      {isProductsLoading ? (
+        <div className={styles.spinnerContainer}>
+          <LoadingSpinner />
+        </div>
+      ) : null}
     </div>
   );
 };

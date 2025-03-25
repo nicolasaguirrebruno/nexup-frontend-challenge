@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import styles from './styles/products.module.css';
+import styles from './styles/productManager.module.css';
 import { CategoryFilter } from './CategoryFilter';
 import { ProductList } from './ProductList';
 import { useProducts } from '../hooks/useProducts';
