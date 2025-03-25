@@ -184,6 +184,15 @@ This provides:
 Conceptually, it also aligns with the **Dependency Inversion Principle** from SOLID:
 Components don’t depend directly on the low-level implementation (`ProductsContext`), but on an abstracted hook (`useProducts`).
 
+### Products API
+
+To simulate an API, I extended the original `.ts` file provided at the beginning of the test by adding logic to emulate realistic behavior.  
+The function `getProductList` was created to receive query parameters and apply three filters accordingly.  
+This results in a **3N complexity**, since it loops over the product list a maximum of three times — which is a performant and acceptable solution for the scope of this challenge.
+
+Inside the context, the `getProducts` function simply passes the parameters to `getProductList`, since filtering is typically the backend's responsibility.  
+To better simulate a real-world API call, I also added a `setTimeout` to mimic the delay of a request being processed by a server.
+
 ### Shared Folder
 
 As in real-world projects, I created a `shared` folder containing components that can be reused across the entire application.  

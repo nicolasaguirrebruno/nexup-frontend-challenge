@@ -21,6 +21,7 @@ export const ProductManager: React.FC = () => {
         </div>
 
         <div>
+          {/* This button doesn't do anything, it's only to get a more realistic interface */}
           <button className={styles.addButton} type="button">
             New product +
           </button>
