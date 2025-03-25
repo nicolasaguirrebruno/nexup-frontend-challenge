@@ -1,61 +1,238 @@
-# Nexup Frontend Challenge
+<div align="center">
+  <a href="nexup.png">
+<img src="assets/nexup.png" width="200" alt="Nexup" />
+  </a>
+</div>
+<br/>
 
-En este repositorio, se encuentra la prueba técnica para el puesto de Frontend Developer en Nexup.
-Este challenge está diseñado para evaluar tus habilidades en React y TypeScript. Consiste en construir una aplicación que muestre una lista de productos, permita filtrarlos por categoría y transforme los elementos de la lista antes de mostrarlos.
+<div align="center">
+  <h1>Nexup Frontend Challenge</h1>
+</div>
+<p align="center">
+  <img src="https://img.shields.io/badge/react-18.3.1-%23757575?logo=React" alt="React.js"/>
+  <img src="https://img.shields.io/badge/typescript-4.9.5-%23757575?logo=Typescript" alt="Npm"/>
+  
+</p>
 
-## Pasos a seguir:
-1. Clone este repositorio en su máquina local usando Git.
-   ```bash
-   git clone https://gitlab.com/nexup/nexup-frontend-challenge.git
-   ```
-2. Crea un repositorio vacío en tu cuenta de GitHub con el mismo nombre de este.
-   ```bash
-    nexup-frontend-challenge
-   ```
-3. Muevesé a la carpeta del proyecto.
-   ```bash
-   cd ./nexup-frontend-challenge
-   ```
-4. Cambia la URL remota del repositorio clonado de GitHub, por la URL de tu repositorio.
-   ```bash
-   git remote set-url origin <tu-repositorio.git>
-   ```
-5. Sube el código a tu repositorio de GitHub.
+This is a challenge for the recruitment process at the **Nexup** team.
 
-## Recomedaciones
-- **No** hagas un _fork_ de este repositorio.
-- **No** hagas _push_ directamente a este repositorio.
-- Crea un commit por cada cambio que realices. Utiliza mensajes **claros** y **descriptivos** para documentar tu proceso.
-- Priorizá la correcta resolución lógica del challenge, no buscamos diseños complejos y complicados
-  - Mantené el código ordenado y fácil de entender
-  - Modularizá los componentes y armá funciones atómicas y reutilizables
-  - Es válida la creación de nuevos componentes intermedios para resolver el problema, los componentes presentados son sugeridos
+#### Main Task
 
-## Tareas
-El objetivo de este challenge es armar un listado de productos que pueda ser filtrado por un selector de categoría:
-- El selector de categoría `CategoryFilter` debe por defecto mostrar una categoría de `Todos`, y debe permitir elegir alguno de los valores permitidos (la lista puede ser expandida si se lo desea). Al elegir un valor, se debe actualizar la lista de productos
-- El listado de productos `ProductList`
-  - La lista debe mostrarse filtrada según la categoría elegida
-  - Cada item debe mostrar los siguientes datos:
-    - Estado del producto: Debe mostrarse como una indicador de color según el estado del producto
-    - Nombre del producto
-    - Categoria del producto
-    - Precio del producto: Debe mostrarse con dos puntos decimales y el signo `$`
-- La interfaz debe ser sencilla y clara. El estilado de componentes es libre, pero se valorará la correcta utilización de técnicas de CSS como Flexbox, Grid, etc.
+- Create a category filter for a list of products.
+- Display the products using a table.
 
-### Objetivos opcionales
-- Simular que la obtensión del listado de productos proviene de una API Rest
-- Agregar un filtro por fulltext de los productos
-- Armar funcionalidad de stock: Por cada producto podria tenerse un stock disponible, y entonces mostrar el stock disponible en el listado y permitir filtrar unicamente aquellos productos con stock
-- Hacer un diseño responsive
+#### Optional Tasks
 
-## Entregables
-- Un enlace a un repositorio de GitHub con el código de la aplicación React.
-- Opcional: Un archivo README con explicaciones sobre el enfoque utilizado y cualquier otra información relevante.
+- Implement a responsive design.
+- Simulate an API call.
+- Add a stock filter.
+- Include a full-text search input.
 
-## Evaluación
-- Correctitud del código: La aplicación debe funcionar correctamente según los requisitos.
-- Calidad del código: Claridad, uso adecuado de TypeScript, organización y limpieza del código.
-- Eficiencia: La lógica debe ser eficiente y bien estructurada.
-- Estilado correcto del código
+## Table of Contents
 
+- Instalation
+- Key Principles Used During Development
+
+# Instalation
+
+First clone the repository and then hit the command `$ npm install` to get the necessary to build components.
+
+# Key Principles Used During Development
+
+The main goal was to create a piece of functionality that feels as realistic as possible.  
+To achieve this, I implemented several architectural decisions.
+
+The first one was to use a context to centralize the product logic and avoid prop drilling.
+
+I believe that components shouldn't handle complex logic — they should focus solely on displaying the necessary information.  
+That’s another reason why they consume the functions they need from the context: to adhere to the **Single Responsibility Principle** from the SOLID principles.
+
+Along with the previous point, inside the context I split the logic into atomic functions to ensure each one has a single responsibility. For example:
+
+```typescript
+const changeProductCategoryFilter = useCallback(
+  async (category: ProductCategory | '') => {
+    if (category === '') {
+      setSelectedCategory(undefined);
+      await getProducts(undefined, selectedStock);
+      return;
+    }
+
+    setSelectedCategory(category);
+    await getProducts(category, selectedStock);
+  },
+  [getProducts, selectedStock],
+);
+
+const changeStockOptionFilter = useCallback(
+  async (stockOption: Stock | '') => {
+    if (stockOption === '') {
+      setSelectedStock(undefined);
+      await getProducts(selectedCategory, undefined);
+      return;
+    }
+
+    setSelectedStock(stockOption);
+    await getProducts(selectedCategory, stockOption);
+  },
+  [getProducts, selectedCategory],
+);
+
+const handleProductSearch = useCallback(
+  (search: string) => {
+    getProducts(selectedCategory, selectedStock, search);
+  },
+  [getProducts, selectedCategory, selectedStock],
+);
+```
+
+Instead of having one big function to manage all filters, I created a separate function for each one.  
+These functions are then consumed from the **Category Filter** component.  
+This approach encapsulates each piece of functionality and ensures that the component responsible for displaying data doesn’t need to worry about the filtering logic.
+
+### Why I Used `useCallback` and `useMemo`
+
+To optimize the performance and stability of the context, I used both `useCallback` and `useMemo` strategically.
+
+#### `useCallback`
+
+I wrapped all handler functions like `getProducts`, `changeProductCategoryFilter`, `changeStockOptionFilter`, and `handleProductSearch` using `useCallback`.  
+This ensures that these functions maintain the **same reference between re-renders**, unless their dependencies change.
+
+This is important for two main reasons:
+
+1. **Avoid unnecessary re-renders** in components that consume the context.
+2. **Preserve function identity**, which is useful when:
+   - Passing these functions as props.
+   - Including them as dependencies in `useEffect`, `useMemo`, or other `useCallback` calls.
+
+Example:
+
+```tsx
+const changeStockOptionFilter = useCallback(
+  async (stockOption: Stock | '') => {
+    if (stockOption === '') {
+      setSelectedStock(undefined);
+      await getProducts(selectedCategory, undefined);
+      return;
+    }
+
+    setSelectedStock(stockOption);
+    await getProducts(selectedCategory, stockOption);
+  },
+  [getProducts, selectedCategory],
+);
+```
+
+#### `useMemo`
+
+I used `useMemo` to memoize the value passed to the `ProductsContext.Provider`.  
+This prevents unnecessary recalculations and re-renders of all components that consume the context whenever the provider itself re-renders.
+
+By memoizing the `value` object, I ensure that the reference remains stable **unless one of its dependencies actually changes**.  
+This is key to **preventing unnecessary updates** in the entire tree that consumes this context.
+
+Example:
+
+```tsx
+const value = useMemo(
+  () => ({
+    products,
+    getProducts,
+    changeProductCategoryFilter,
+    changeStockOptionFilter,
+    isProductsLoading,
+    productsFetchError,
+    selectedCategory,
+    selectedStock,
+    handleProductSearch,
+  }),
+  [
+    products,
+    getProducts,
+    changeProductCategoryFilter,
+    changeStockOptionFilter,
+    isProductsLoading,
+    productsFetchError,
+    selectedCategory,
+    selectedStock,
+    handleProductSearch,
+  ],
+);
+```
+
+### Custom Hook: `useProducts`
+
+To simplify and standardize access to the `ProductsContext`, I created a custom hook:
+
+```tsx
+export const useProducts = () => {
+  const context = useContext(ProductsContext);
+  if (!context) {
+    throw new Error('useProducts must be used within a ProductsProvider');
+  }
+  return context;
+};
+```
+
+This provides:
+
+- A cleaner and reusable way to access context values.
+- Safety, by ensuring the hook is used inside the correct provider.
+- A layer of abstraction, which reduces coupling between components and context.
+
+Conceptually, it also aligns with the **Dependency Inversion Principle** from SOLID:
+Components don’t depend directly on the low-level implementation (`ProductsContext`), but on an abstracted hook (`useProducts`).
+
+### Shared Folder
+
+As in real-world projects, I created a `shared` folder containing components that can be reused across the entire application.  
+This includes components like `Chip` and `Spinner`, which are very common in many UI libraries.
+
+### Barrel Files
+
+To simplify and standardize imports across the application, I used **barrel files**.
+
+A barrel file is an `index.ts` that re-exports modules from a folder, allowing other parts of the app to import from a single entry point instead of referencing individual files.
+
+For example, instead of importing like this:
+
+```tsx
+import { Chip } from '../../shared/Chip';
+import { Spinner } from '../../shared/Spinner';
+```
+
+We write:
+
+```tsx
+import { Chip, Spinner } from '../../shared';
+```
+
+This improves readability, keeps import paths clean, and makes it easier to scale and maintain the codebase as the project grows.
+
+### CSS Modules
+
+For styling, I used **CSS Modules**, which allow for locally scoped styles by default.  
+This prevents class name collisions and makes it easier to maintain styles in larger applications.
+
+Each component has its own `.module.css` file, and styles are imported like this:
+
+```tsx
+import styles from './productList.module.css';
+
+return <div className={styles.tableContainer}>...</div>;
+```
+
+This approach keeps styles tightly coupled to their respective components, encouraging better modularity and separation of concerns.
+
+### Commit Convention
+
+For commit messages, I followed the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
+
+This standard provides a consistent way to structure commit messages, making it easier to understand the history of changes, automate changelogs, and integrate with tools like semantic versioning.
+
+Examples:
+
+- `feat: added challenge functionalities`
+- `fix: linting problems`
+- `refactor: splited css, responsive, spinner, not found message`
